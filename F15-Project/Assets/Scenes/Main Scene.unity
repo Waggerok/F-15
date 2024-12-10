@@ -554,6 +554,8 @@ MonoBehaviour:
   _landingGearDefaultMaterial: {fileID: 13400000, guid: c3d85748cf703084a867665efa8e6863, type: 2}
   _maxThrust: 100000
   _throttleSpeed: 1
+  _gLimit: 4
+  _gLimitPitch: 8
   _liftPower: 150
   _angleOfAttackLiftCurve:
     serializedVersion: 2
@@ -867,6 +869,33 @@ MonoBehaviour:
   _airbrakeDrag: 5
   _flapsDeployed: 0
   _airbrakeDeployed: 0
+  _turnSpeed: {x: 60, y: 30, z: 540}
+  _turnAcceleration: {x: 120, y: 60, z: 1080}
+  _steeringCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 200
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _currentControlInput: {x: 0, y: 0, z: 0}
 --- !u!136 &1340521864 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 824935307425706135, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
