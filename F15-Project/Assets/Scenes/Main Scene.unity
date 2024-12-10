@@ -200,6 +200,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8849735085998360814, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1123947051}
+    - targetCorrespondingSourceObject: {fileID: 8849735085998360814, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1123947055}
     - targetCorrespondingSourceObject: {fileID: 3943335523245466875, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 808182589}
@@ -207,6 +210,36 @@ PrefabInstance:
 --- !u!136 &316524896 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 1080852128345951242, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &537531161 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8270134564511878965, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &537531162 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 210230462849128899, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &547023800 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7098709419306614170, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &553212828 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5036458651028698839, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &632106426 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6744892543747878457, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &632106427 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4057628315991148046, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
   m_PrefabInstance: {fileID: 299625571}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &660815439
@@ -426,6 +459,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _planeController: {fileID: 1123947051}
+--- !u!4 &839317533 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7287516894575911195, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -518,6 +556,16 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1123947050}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &991087908 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4376326503470435326, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1057090900 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8180032383524918375, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1123947045 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8849735085998360814, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
@@ -545,6 +593,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37608846b76cc8549867b5d7e9b5f380, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _airbrakeDeployed: 0
   _landingGear:
   - {fileID: 316524896}
   - {fileID: 1340521864}
@@ -554,8 +603,6 @@ MonoBehaviour:
   _landingGearDefaultMaterial: {fileID: 13400000, guid: c3d85748cf703084a867665efa8e6863, type: 2}
   _maxThrust: 100000
   _throttleSpeed: 1
-  _gLimit: 4
-  _gLimitPitch: 8
   _liftPower: 150
   _angleOfAttackLiftCurve:
     serializedVersion: 2
@@ -868,7 +915,6 @@ MonoBehaviour:
     m_RotationOrder: 4
   _airbrakeDrag: 5
   _flapsDeployed: 0
-  _airbrakeDeployed: 0
   _turnSpeed: {x: 60, y: 30, z: 540}
   _turnAcceleration: {x: 120, y: 60, z: 1080}
   _steeringCurve:
@@ -896,6 +942,58 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _currentControlInput: {x: 0, y: 0, z: 0}
+  _gLimit: 4
+  _gLimitPitch: 8
+--- !u!114 &1123947055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1123947045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b53dd26290f265d49b5e7629f205a708, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _planeController: {fileID: 1123947051}
+  _afterburnerGraphics:
+  - {fileID: 632106426}
+  - {fileID: 537531161}
+  _afterburnersTransforms:
+  - {fileID: 632106427}
+  - {fileID: 537531162}
+  _afterBurnerTreshold: 0.5
+  _afterburnerMinSize: 0.25
+  _afterburnerMaxSize: 1
+  _deflectionSpeed: 5
+  _maxAileronDeflection: 20
+  _maxElevatorDeflection: 20
+  _maxRudderDeflection: 20
+  _leftAileron: {fileID: 1524915838}
+  _rightAileron: {fileID: 547023800}
+  _elevators:
+  - {fileID: 1169582777}
+  - {fileID: 1278991059}
+  _rudders:
+  - {fileID: 553212828}
+  - {fileID: 1057090900}
+  _airbrake: {fileID: 991087908}
+  _airBrakeDeflection: 45
+  _flaps:
+  - {fileID: 839317533}
+  - {fileID: 2043226146}
+  _flapsDeflection: 30
+--- !u!4 &1169582777 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5719306870350747766, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1278991059 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 758815499812652947, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
 --- !u!136 &1340521864 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 824935307425706135, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
@@ -1029,9 +1127,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1524915838 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 9015424067187965477, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
 --- !u!136 &1546794657 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 7525370270416780603, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2043226146 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6457283437137519601, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
   m_PrefabInstance: {fileID: 299625571}
   m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807

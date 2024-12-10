@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -58,109 +58,31 @@ public static class Utilities
 
 public class PlaneController : MonoBehaviour
 {
-    public bool AirBrakeDeployed => _airbrakeDeployed;
-
-    [Header("GameObjects")]
-    [SerializeField] private List<Collider> _landingGear;
-    [SerializeField] private Rigidbody _rigidbody;
-    [SerializeField] private PhysicMaterial _landingGearBrakesMaterial;
-    [SerializeField] private PhysicMaterial _landingGearDefaultMaterial;
-
-    [Header("BaseParameters")]
-    [SerializeField] private float _maxThrust;
-
-    [SerializeField] private float _throttleSpeed;
-
-    [SerializeField] private float _gLimit;
-    [SerializeField] private float _gLimitPitch;
-
-    [Header("Lift")]
-    [SerializeField] private float _liftPower;
-    [SerializeField] private AnimationCurve _angleOfAttackLiftCurve;
-
-    [SerializeField] private float _inducedDrag;
-    [SerializeField] private AnimationCurve _inducedDragCurve;
-
-    [SerializeField] private float _rudderPower;
-    [SerializeField] private AnimationCurve _angleOfAttackRudderCurve;
-    [SerializeField] private AnimationCurve _rudderInducedDragCurve;
-
-    [SerializeField] private float _flapsLiftPower;
-    [SerializeField] private float _flapsAngleOfAttackBias;
-    [SerializeField] float _flapsDrag;
-    [SerializeField] private float _flapsRetractSpeed;
-
-    [Header("Drag")]
-    [SerializeField] AnimationCurve _dragForward;
-    [SerializeField] AnimationCurve _dragBack;
-    [SerializeField] AnimationCurve _dragLeft;
-    [SerializeField] AnimationCurve _dragRight;
-    [SerializeField] AnimationCurve _dragTop;
-    [SerializeField] AnimationCurve _dragBottom;
-
-    [SerializeField] float _airbrakeDrag;
-
-    [SerializeField] private bool _flapsDeployed;
-    [SerializeField] private bool _airbrakeDeployed;
-
-    [Header("Steering")]
-    [SerializeField] private Vector3 _turnSpeed;
-    [SerializeField] private Vector3 _turnAcceleration;
-
-    [SerializeField] private AnimationCurve _steeringCurve;
-    [SerializeField] private Vector3 _currentControlInput;
-
-    
-
-    [Header("Air Density And Temperature")]
-    private const float _seaLevelTemperature = 288.15f;
-    private const float _temperatureLapseRate = -0.0065f;
-
-    private Vector3 _currentVelocity;
-    private Vector3 _currentLocalVelocity;
-    private Vector3 _currentLocalAngularVelocity;
-
-    private float _angleOfAttack;
-    private float _angleOfAttackYaw;
-
-    private Vector3 _localGForce;
-    private Vector3 _lastVelocity;
-
-    private float _throttle;
-    private float _throttleInput;
-
-
-
-
-    public bool FlapsDeployed
+    private void FixedUpdate()
     {
-        get => _flapsDeployed;
+        var deltaTime = Time.fixedDeltaTime;
 
-        private set
-        {
-            _flapsDeployed = value;
+        CalculateState();
+        CalculateGForces(deltaTime);
+        UpdateFlaps();
 
-            foreach (var lg in _landingGear)
-            {
-                lg.enabled = value;
-            }
-        }
+        UpdateLift();
+        UpdateThrust();
+        UpdateThrottle(deltaTime);
+        UpdateSteering(deltaTime);
+
+        UpdateDrag();
     }
 
-    public void ToggleFlaps()
+    private void CalculateState()
     {
-        if (_currentLocalVelocity.z < _flapsRetractSpeed)
-        {
-            FlapsDeployed = !FlapsDeployed;
-        }
-    }
+        var invRotation = Quaternion.Inverse(_rigidbody.rotation);
 
-    private void UpdateFlaps()
-    {
-        if (_currentLocalVelocity.z > _flapsRetractSpeed)
-        {
-            FlapsDeployed = false;
-        }
+        _currentVelocity = _rigidbody.velocity;
+        _currentLocalVelocity = invRotation * _currentVelocity;
+        _currentLocalAngularVelocity = invRotation * _rigidbody.angularVelocity;
+
+        CalculateAngleOfAttack();
     }
 
     private void CalculateAngleOfAttack()
@@ -187,17 +109,6 @@ public class PlaneController : MonoBehaviour
         _localGForce = invRotation * acceleration;
 
         _lastVelocity = _currentVelocity;
-    }
-
-    private void CalculateState()
-    {
-        var invRotation = Quaternion.Inverse(_rigidbody.rotation);
-
-        _currentVelocity = _rigidbody.velocity;
-        _currentLocalVelocity = invRotation * _currentVelocity;
-        _currentLocalAngularVelocity = invRotation * _rigidbody.angularVelocity;
-
-        CalculateAngleOfAttack();
     }
 
     private void UpdateThrust()
@@ -261,6 +172,22 @@ public class PlaneController : MonoBehaviour
         var drag = dragCoefficientToDirections.magnitude * globalVelocitySqr * -globalVelocity.normalized;
 
         _rigidbody.AddForce(drag, ForceMode.Force);
+    }
+
+    public void ToggleFlaps()
+    {
+        if (_currentLocalVelocity.z < _flapsRetractSpeed)
+        {
+            FlapsDeployed = !FlapsDeployed;
+        }
+    }
+
+    private void UpdateFlaps()
+    {
+        if (_currentLocalVelocity.z > _flapsRetractSpeed)
+        {
+            FlapsDeployed = false;
+        }
     }
 
     private Vector3 CalculateLift(float angleOfAttack, Vector3 rightAxis, float liftPower,
@@ -331,10 +258,8 @@ public class PlaneController : MonoBehaviour
         var steeringPower = _steeringCurve.Evaluate(speed);
         var airDensity = CalculateAirDensity(_rigidbody.position.y);
 
-        // Расчет масштабирования силы управления с учетом перегрузок
         var gForceScaling = CalculateGLimiter(_currentControlInput, _turnSpeed * Mathf.Deg2Rad * steeringPower * airDensity);
 
-        // Целевая угловая скорость с учетом ограничений по перегрузкам
         var targetAV = Vector3.Scale(_currentControlInput, _turnSpeed * steeringPower * gForceScaling);
         var av = _currentLocalAngularVelocity * Mathf.Rad2Deg;
 
@@ -344,6 +269,21 @@ public class PlaneController : MonoBehaviour
             CalculateSteering(dt, av.z, targetAV.z, _turnAcceleration.z * steeringPower));
 
         _rigidbody.AddRelativeTorque(correction * Mathf.Deg2Rad, ForceMode.VelocityChange);
+
+        var correctionInput = new Vector3(
+            Mathf.Clamp((targetAV.x - av.x) / _turnAcceleration.x, -1, 1),
+            Mathf.Clamp((targetAV.y - av.y) / _turnAcceleration.y, -1, 1),
+            Mathf.Clamp((targetAV.z - av.z) / _turnAcceleration.z, -1, 1)
+        );
+
+        var effectiveInput = (correctionInput + _currentControlInput) * gForceScaling;
+
+        //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+        EffectiveInput = new Vector3(
+            Mathf.Clamp(effectiveInput.x, -1, 1),
+            Mathf.Clamp(effectiveInput.y, -1, 1),
+            Mathf.Clamp(effectiveInput.z, -1, 1)
+        );
     }
 
     public void SetControlInput(Vector3 input)
@@ -380,19 +320,110 @@ public class PlaneController : MonoBehaviour
         return 1;
     }
 
-    private void FixedUpdate()
+    //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+
+    [SerializeField] private bool _airbrakeDeployed;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    public bool AirbrakeDeployed
     {
-        var deltaTime = Time.fixedDeltaTime;
-
-        CalculateState();
-        CalculateGForces(deltaTime);
-        UpdateFlaps();
-
-        UpdateLift();
-        UpdateThrust();
-        UpdateThrottle(deltaTime);
-        UpdateSteering(deltaTime);
-
-        UpdateDrag();
+        get { return _airbrakeDeployed; }
+        private set { _airbrakeDeployed = value; }
     }
+
+    [Header("GameObjects")]
+    [SerializeField] private List<Collider> _landingGear;//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+    [SerializeField] private Rigidbody _rigidbody;
+    [SerializeField] private PhysicMaterial _landingGearBrakesMaterial;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    [SerializeField] private PhysicMaterial _landingGearDefaultMaterial;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+
+    [Header("BaseParameters")]
+    [SerializeField] private float _maxThrust;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+
+    [SerializeField] private float _throttleSpeed;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+
+    [Header("Lift")]
+    [SerializeField] private float _liftPower;
+    [SerializeField] private AnimationCurve _angleOfAttackLiftCurve;
+
+    [SerializeField] private float _inducedDrag;
+    [SerializeField] private AnimationCurve _inducedDragCurve;
+
+    [SerializeField] private float _rudderPower;
+    [SerializeField] private AnimationCurve _angleOfAttackRudderCurve;
+    [SerializeField] private AnimationCurve _rudderInducedDragCurve;
+
+    [SerializeField] private float _flapsLiftPower;
+    [SerializeField] private float _flapsAngleOfAttackBias;
+    [SerializeField] float _flapsDrag;
+    [SerializeField] private float _flapsRetractSpeed;
+
+    [Header("Drag")]
+    [SerializeField] AnimationCurve _dragForward;
+    [SerializeField] AnimationCurve _dragBack;
+    [SerializeField] AnimationCurve _dragLeft;
+    [SerializeField] AnimationCurve _dragRight;
+    [SerializeField] AnimationCurve _dragTop;
+    [SerializeField] AnimationCurve _dragBottom;
+
+    [SerializeField] float _airbrakeDrag;
+
+    [SerializeField] private bool _flapsDeployed;
+
+    [Header("Air Density And Temperature")]
+    private const float _seaLevelTemperature = 288.15f;
+    private const float _temperatureLapseRate = -0.0065f;
+
+    private Vector3 _currentVelocity;
+    private Vector3 _currentLocalVelocity;
+    private Vector3 _currentLocalAngularVelocity;
+
+    private float _angleOfAttack;
+    private float _angleOfAttackYaw;
+
+    private Vector3 _localGForce;
+    private Vector3 _lastVelocity;
+
+    private float _throttle;
+    public float Throttle
+    {
+        get { return _throttle; }
+        private set { _throttle = value; }
+    }
+    private float _throttleInput;
+
+    [Header("Steering")]
+    [SerializeField] private Vector3 _turnSpeed;
+    [SerializeField] private Vector3 _turnAcceleration;
+    [SerializeField] private AnimationCurve _steeringCurve;
+    [SerializeField] private Vector3 _currentControlInput;
+
+    [SerializeField] private float _gLimit;
+    [SerializeField] private float _gLimitPitch;
+
+    private Vector3 _effectiveInput;
+
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ EffectiveInput
+    public Vector3 EffectiveInput
+    {
+        get { return _effectiveInput; }
+        private set { _effectiveInput = value; } // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    }
+
+    public bool FlapsDeployed//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
+    {
+        get => _flapsDeployed;
+
+        private set
+        {
+            _flapsDeployed = value;
+
+            foreach (var lg in _landingGear)
+            {
+                lg.enabled = value;
+            }
+        }
+    }
+
+
+
+
 }
