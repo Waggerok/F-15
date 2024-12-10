@@ -122,24 +122,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &17202897 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3966265185429392935, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
-  m_PrefabInstance: {fileID: 299625571}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &17202901
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 17202897}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cfb5246618a343b488d5970505c9ec3f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _planeController: {fileID: 1123947051}
 --- !u!1001 &299625571
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -218,9 +200,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8849735085998360814, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1123947051}
-    - targetCorrespondingSourceObject: {fileID: 3966265185429392935, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 3943335523245466875, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 17202901}
+      addedObject: {fileID: 808182589}
   m_SourcePrefab: {fileID: 100100000, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
 --- !u!136 &316524896 stripped
 CapsuleCollider:
@@ -426,6 +408,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &808182585 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3943335523245466875, guid: 868b13a7be7adb148b89b9bcf56bb6a6, type: 3}
+  m_PrefabInstance: {fileID: 299625571}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &808182589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 808182585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfb5246618a343b488d5970505c9ec3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _planeController: {fileID: 1123947051}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -568,7 +568,7 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: -15
+      time: -20
       value: -1
       inSlope: 0
       outSlope: 0
@@ -577,7 +577,7 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 25
+      time: 20
       value: 1
       inSlope: 0
       outSlope: 0
@@ -649,7 +649,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _rudderPower: 150
+  _rudderPower: 100
   _angleOfAttackRudderCurve:
     serializedVersion: 2
     m_Curve:

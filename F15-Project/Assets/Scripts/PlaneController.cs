@@ -4,13 +4,21 @@ using UnityEngine;
 
 public static class Utilities
 {
+    public static float MoveTo(float value, float target, float speed, float deltaTime, float min = 0, float max = 1)
+    {
+        var diff = target - value;
+
+        var delta = Mathf.Clamp(diff, -speed * deltaTime, speed * deltaTime);
+
+        return Mathf.Clamp(value + delta, min, max);
+    }
+
     public static Vector3 Scale6(
     Vector3 value,
     float positiveX, float negativeX,
     float positiveY, float negativeY,
     float positiveZ, float negativeZ
-)
-    {
+)   {
         var result = value;
 
         switch (result.x)
@@ -46,18 +54,12 @@ public static class Utilities
         return result;
     }
 
-    public static float MoveTo(float value, float target, float speed, float deltaTime, float min = 0, float max = 1)
-    {
-        var diff = target - value;
-
-        var delta = Mathf.Clamp(diff, -speed * deltaTime, speed * deltaTime);
-
-        return Mathf.Clamp(value + delta, min, max);
-    }
 }
 
 public class PlaneController : MonoBehaviour
 {
+    public bool AirBrakeDeployed => _airbrakeDeployed;
+
     [Header("GameObjects")]
     [SerializeField] private List<Collider> _landingGear;
     [SerializeField] private Rigidbody _rigidbody;
@@ -114,7 +116,7 @@ public class PlaneController : MonoBehaviour
 
     private float _throttle;
     private float _throttleInput;
-   
+
 
     public bool FlapsDeployed
     {
