@@ -1,17 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem; // Не забудьте подключить пространство имен
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour, PlayerInputAsset.IPlayerInputActions
 {
     [SerializeField] private PlaneController _planeController;
-    PlayerInputAsset _playerInput;
+
+    private PlayerInputAsset _playerInput;
+    private Vector3 _controlInput;
 
     void Awake()
     {
         _playerInput = new PlayerInputAsset();
+
         _playerInput.PlayerInput.SetCallbacks(this);
+    }
+
+    // Передача значения в класс PlaneController
+    private void Update()
+    {
+        if (_planeController == null)
+        {
+            return;
+        }
+
+        _planeController.SetControlInput(_controlInput);
     }
 
     void OnEnable()
@@ -45,5 +57,31 @@ public class PlayerController : MonoBehaviour, PlayerInputAsset.IPlayerInputActi
         {
             _planeController.ToggleFlaps();
         }
+    }
+
+    // Новый код обработки поворота 
+    public void OnRollPitch(InputAction.CallbackContext context)
+    {
+        if (_planeController == null)
+        {
+            return;
+        }
+
+        var input = context.ReadValue<Vector2>();
+
+        _controlInput = new Vector3(input.y, _controlInput.y, -input.x);
+    }
+
+    // Новый код обработки поворота 
+    public void OnYaw(InputAction.CallbackContext context)
+    {
+        if (_planeController == null)
+        {
+            return;
+        }
+
+        var input = context.ReadValue<float>();
+
+        _controlInput = new Vector3(_controlInput.x, input, _controlInput.z);
     }
 }

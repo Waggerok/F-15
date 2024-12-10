@@ -71,6 +71,9 @@ public class PlaneController : MonoBehaviour
 
     [SerializeField] private float _throttleSpeed;
 
+    [SerializeField] private float _gLimit;
+    [SerializeField] private float _gLimitPitch;
+
     [Header("Lift")]
     [SerializeField] private float _liftPower;
     [SerializeField] private AnimationCurve _angleOfAttackLiftCurve;
@@ -100,6 +103,15 @@ public class PlaneController : MonoBehaviour
     [SerializeField] private bool _flapsDeployed;
     [SerializeField] private bool _airbrakeDeployed;
 
+    [Header("Steering")]
+    [SerializeField] private Vector3 _turnSpeed;
+    [SerializeField] private Vector3 _turnAcceleration;
+
+    [SerializeField] private AnimationCurve _steeringCurve;
+    [SerializeField] private Vector3 _currentControlInput;
+
+    
+
     [Header("Air Density And Temperature")]
     private const float _seaLevelTemperature = 288.15f;
     private const float _temperatureLapseRate = -0.0065f;
@@ -116,6 +128,8 @@ public class PlaneController : MonoBehaviour
 
     private float _throttle;
     private float _throttleInput;
+
+
 
 
     public bool FlapsDeployed
@@ -303,6 +317,69 @@ public class PlaneController : MonoBehaviour
         _rigidbody.AddRelativeForce(yawForce);
     }
 
+    private float CalculateSteering(float dt, float angularVelocity, float targetVelocity, float acceleration)
+    {
+        var difference = targetVelocity - angularVelocity;
+        var accel = acceleration * dt;
+
+        return Mathf.Clamp(difference, -accel, accel);
+    }
+
+    private void UpdateSteering(float dt)
+    {
+        var speed = Mathf.Max(0, _currentLocalVelocity.z);
+        var steeringPower = _steeringCurve.Evaluate(speed);
+        var airDensity = CalculateAirDensity(_rigidbody.position.y);
+
+        // Расчет масштабирования силы управления с учетом перегрузок
+        var gForceScaling = CalculateGLimiter(_currentControlInput, _turnSpeed * Mathf.Deg2Rad * steeringPower * airDensity);
+
+        // Целевая угловая скорость с учетом ограничений по перегрузкам
+        var targetAV = Vector3.Scale(_currentControlInput, _turnSpeed * steeringPower * gForceScaling);
+        var av = _currentLocalAngularVelocity * Mathf.Rad2Deg;
+
+        var correction = new Vector3(
+            CalculateSteering(dt, av.x, targetAV.x, _turnAcceleration.x * steeringPower),
+            CalculateSteering(dt, av.y, targetAV.y, _turnAcceleration.y * steeringPower),
+            CalculateSteering(dt, av.z, targetAV.z, _turnAcceleration.z * steeringPower));
+
+        _rigidbody.AddRelativeTorque(correction * Mathf.Deg2Rad, ForceMode.VelocityChange);
+    }
+
+    public void SetControlInput(Vector3 input)
+    {
+        _currentControlInput = Vector3.ClampMagnitude(input, 1);
+    }
+
+    private Vector3 CalculateGForceLimit(Vector3 input)
+    {
+        return Utilities.Scale6(input,
+            _gLimit, _gLimitPitch,
+            _gLimit, _gLimit,
+            _gLimit, _gLimit) * 9.81f;
+    }
+
+    private Vector3 CalculateGForce(Vector3 angularVelocity, Vector3 velocity)
+    {
+        return Vector3.Cross(angularVelocity, velocity);
+    }
+
+    private float CalculateGLimiter(Vector3 controlInput, Vector3 maxAngularVelocity)
+    {
+        var maxInput = controlInput.normalized;
+
+        var limit = CalculateGForceLimit(maxInput);
+
+        var maxGForce = CalculateGForce(Vector3.Scale(maxInput, maxAngularVelocity), _currentLocalVelocity);
+
+        if (maxGForce.magnitude > limit.magnitude)
+        {
+            return limit.magnitude / maxGForce.magnitude;
+        }
+
+        return 1;
+    }
+
     private void FixedUpdate()
     {
         var deltaTime = Time.fixedDeltaTime;
@@ -314,6 +391,7 @@ public class PlaneController : MonoBehaviour
         UpdateLift();
         UpdateThrust();
         UpdateThrottle(deltaTime);
+        UpdateSteering(deltaTime);
 
         UpdateDrag();
     }

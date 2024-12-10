@@ -44,6 +44,24 @@ public partial class @PlayerInputAsset: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RollPitch"",
+                    ""type"": ""Value"",
+                    ""id"": ""8d6575e4-9b7b-4fc3-bf22-c0ab8ae3b1c1"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Yaw"",
+                    ""type"": ""Value"",
+                    ""id"": ""1c2cbb93-e1b2-4eb2-89b4-e9119eb5b88a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -90,6 +108,94 @@ public partial class @PlayerInputAsset: IInputActionCollection2, IDisposable
                     ""action"": ""Flaps"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""5f2064d3-563d-49a9-9384-1ce7a87d77cd"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RollPitch"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""a8d13a0e-1fe1-483e-978d-e95ac69b884b"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RollPitch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""6c600736-577f-47dc-a45f-f719bfe3cdef"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RollPitch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""09ab67b4-38b6-4b2d-9358-e8918ac3659b"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RollPitch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""bfc39433-36df-49b9-b2bf-4783a9d799ef"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RollPitch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""84170057-cec8-440c-ad39-150eecb06e61"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Yaw"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""f7c0d7ce-128b-4351-a40b-96a40590087a"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Yaw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""70922c03-d415-4263-aeb0-199d80840c88"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Yaw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -100,6 +206,8 @@ public partial class @PlayerInputAsset: IInputActionCollection2, IDisposable
         m_PlayerInput = asset.FindActionMap("PlayerInput", throwIfNotFound: true);
         m_PlayerInput_Throttle = m_PlayerInput.FindAction("Throttle", throwIfNotFound: true);
         m_PlayerInput_Flaps = m_PlayerInput.FindAction("Flaps", throwIfNotFound: true);
+        m_PlayerInput_RollPitch = m_PlayerInput.FindAction("RollPitch", throwIfNotFound: true);
+        m_PlayerInput_Yaw = m_PlayerInput.FindAction("Yaw", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -163,12 +271,16 @@ public partial class @PlayerInputAsset: IInputActionCollection2, IDisposable
     private List<IPlayerInputActions> m_PlayerInputActionsCallbackInterfaces = new List<IPlayerInputActions>();
     private readonly InputAction m_PlayerInput_Throttle;
     private readonly InputAction m_PlayerInput_Flaps;
+    private readonly InputAction m_PlayerInput_RollPitch;
+    private readonly InputAction m_PlayerInput_Yaw;
     public struct PlayerInputActions
     {
         private @PlayerInputAsset m_Wrapper;
         public PlayerInputActions(@PlayerInputAsset wrapper) { m_Wrapper = wrapper; }
         public InputAction @Throttle => m_Wrapper.m_PlayerInput_Throttle;
         public InputAction @Flaps => m_Wrapper.m_PlayerInput_Flaps;
+        public InputAction @RollPitch => m_Wrapper.m_PlayerInput_RollPitch;
+        public InputAction @Yaw => m_Wrapper.m_PlayerInput_Yaw;
         public InputActionMap Get() { return m_Wrapper.m_PlayerInput; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -184,6 +296,12 @@ public partial class @PlayerInputAsset: IInputActionCollection2, IDisposable
             @Flaps.started += instance.OnFlaps;
             @Flaps.performed += instance.OnFlaps;
             @Flaps.canceled += instance.OnFlaps;
+            @RollPitch.started += instance.OnRollPitch;
+            @RollPitch.performed += instance.OnRollPitch;
+            @RollPitch.canceled += instance.OnRollPitch;
+            @Yaw.started += instance.OnYaw;
+            @Yaw.performed += instance.OnYaw;
+            @Yaw.canceled += instance.OnYaw;
         }
 
         private void UnregisterCallbacks(IPlayerInputActions instance)
@@ -194,6 +312,12 @@ public partial class @PlayerInputAsset: IInputActionCollection2, IDisposable
             @Flaps.started -= instance.OnFlaps;
             @Flaps.performed -= instance.OnFlaps;
             @Flaps.canceled -= instance.OnFlaps;
+            @RollPitch.started -= instance.OnRollPitch;
+            @RollPitch.performed -= instance.OnRollPitch;
+            @RollPitch.canceled -= instance.OnRollPitch;
+            @Yaw.started -= instance.OnYaw;
+            @Yaw.performed -= instance.OnYaw;
+            @Yaw.canceled -= instance.OnYaw;
         }
 
         public void RemoveCallbacks(IPlayerInputActions instance)
@@ -215,5 +339,7 @@ public partial class @PlayerInputAsset: IInputActionCollection2, IDisposable
     {
         void OnThrottle(InputAction.CallbackContext context);
         void OnFlaps(InputAction.CallbackContext context);
+        void OnRollPitch(InputAction.CallbackContext context);
+        void OnYaw(InputAction.CallbackContext context);
     }
 }
