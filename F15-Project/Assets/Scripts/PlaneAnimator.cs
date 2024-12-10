@@ -4,6 +4,49 @@ using UnityEngine;
 
 public class PlaneAnimator : MonoBehaviour
 {
+
+    [SerializeField] private PlaneController _planeController;
+
+    [Header("AfterBurner")]
+    [SerializeField] private List<GameObject> _afterburnerGraphics;
+    [SerializeField] private List<Transform> _afterburnersTransforms;
+
+    [SerializeField] private float _afterBurnerTreshold;
+    [SerializeField] private float _afterburnerMinSize;
+    [SerializeField] private float _afterburnerMaxSize;
+
+    [Header("Deflection")]
+    [SerializeField] private float _deflectionSpeed;
+
+    [SerializeField] private float _maxAileronDeflection;
+    [SerializeField] private float _maxElevatorDeflection;
+    [SerializeField] private float _maxRudderDeflection;
+    [SerializeField] private float _airBrakeDeflection;
+    [SerializeField] private float _flapsDeflection;
+
+    [Header("Aileron")]
+    [SerializeField] private Transform _leftAileron;
+    [SerializeField] private Transform _rightAileron;
+
+    [Header("Elevators")]
+    [SerializeField] private List<Transform> _elevators;
+
+    [Header("Rudders")]
+    [SerializeField] private List<Transform> _rudders;
+
+    private Vector3 _deflection;
+
+    private readonly Dictionary<Transform, Quaternion> _neutralPoses = new();
+
+    [Header("AirBrake")]
+    [SerializeField] private Transform _airbrake;  
+    private float _airbrakePosition;
+
+    [Header("Flaps")]
+    [SerializeField] private List<Transform> _flaps;
+    private float _flapsPosition;
+
+
     private void LateUpdate()
     {
         var dt = Time.deltaTime;
@@ -115,48 +158,6 @@ public class PlaneAnimator : MonoBehaviour
     }
 
 
-    [SerializeField] private PlaneController _planeController;
-
-    [Header("AfterBurner")]
-    [SerializeField] private List<GameObject> _afterburnerGraphics;
-    [SerializeField] private List<Transform> _afterburnersTransforms;
-
-    [SerializeField] private float _afterBurnerTreshold;
-    [SerializeField] private float _afterburnerMinSize;
-    [SerializeField] private float _afterburnerMaxSize;
-
-    [Header("Deflection")]
-    [SerializeField] private float _deflectionSpeed;
-
-    [SerializeField] private float _maxAileronDeflection;
-    [SerializeField] private float _maxElevatorDeflection;
-    [SerializeField] private float _maxRudderDeflection;
-
-    [Header("Aileron")]
-    [SerializeField] private Transform _leftAileron;
-    [SerializeField] private Transform _rightAileron;
-
-    [Header("Elevators")]
-    [SerializeField] private List<Transform> _elevators;
-
-    [Header("Rudders")]
-    [SerializeField] private List<Transform> _rudders;
-
-    private Vector3 _deflection;
-
-    private readonly Dictionary<Transform, Quaternion> _neutralPoses = new();
-
-    [Header("AirBrake")]
-    [SerializeField] private Transform _airbrake;
-
-    [SerializeField] private float _airBrakeDeflection;
-    private float _airbrakePosition;
-
-    [Header("Flaps")]
-    [SerializeField] private List<Transform> _flaps;
-
-    [SerializeField] private float _flapsDeflection;
-    private float _flapsPosition;
 }
 
 

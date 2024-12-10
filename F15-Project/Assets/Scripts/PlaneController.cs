@@ -58,6 +58,108 @@ public static class Utilities
 
 public class PlaneController : MonoBehaviour
 {
+    [SerializeField] private bool _airbrakeDeployed;//�������� �� ��������� ������
+    public bool AirbrakeDeployed
+    {
+        get { return _airbrakeDeployed; }
+        private set { _airbrakeDeployed = value; }
+    }
+
+    [Header("GameObjects")]
+    [SerializeField] private List<Collider> _landingGear;//������ ����������� ��� ������� �����
+    [SerializeField] private Rigidbody _rigidbody;
+    [SerializeField] private PhysicMaterial _landingGearBrakesMaterial;//�������� ������ ������� ��� ������� �����, ����� ����������� ��������� ������
+    [SerializeField] private PhysicMaterial _landingGearDefaultMaterial;//�������� ������ ������� ��� ������� �����, ����� �� ����������� ��������� ������
+
+    [Header("BaseParameters")]
+    [SerializeField] private float _maxThrust;//������������ ����
+
+    [SerializeField] private float _throttleSpeed;//�������� ��������� �������� ����
+
+    [Header("Lift")]
+    [SerializeField] private float _liftPower;
+    [SerializeField] private AnimationCurve _angleOfAttackLiftCurve;
+
+    [SerializeField] private float _inducedDrag;
+    [SerializeField] private AnimationCurve _inducedDragCurve;
+
+    [SerializeField] private float _rudderPower;
+    [SerializeField] private AnimationCurve _angleOfAttackRudderCurve;
+    [SerializeField] private AnimationCurve _rudderInducedDragCurve;
+
+    [SerializeField] private float _flapsLiftPower;
+    [SerializeField] private float _flapsAngleOfAttackBias;
+    [SerializeField] float _flapsDrag;
+    [SerializeField] private float _flapsRetractSpeed;
+
+    [Header("Drag")]
+    [SerializeField] AnimationCurve _dragForward;
+    [SerializeField] AnimationCurve _dragBack;
+    [SerializeField] AnimationCurve _dragLeft;
+    [SerializeField] AnimationCurve _dragRight;
+    [SerializeField] AnimationCurve _dragTop;
+    [SerializeField] AnimationCurve _dragBottom;
+
+    [SerializeField] float _airbrakeDrag;
+
+    [SerializeField] private bool _flapsDeployed;
+
+    [Header("Air Density And Temperature")]
+    private const float _seaLevelTemperature = 288.15f;
+    private const float _temperatureLapseRate = -0.0065f;
+
+    private Vector3 _currentVelocity;
+    private Vector3 _currentLocalVelocity;
+    private Vector3 _currentLocalAngularVelocity;
+
+    private float _angleOfAttack;
+    private float _angleOfAttackYaw;
+
+    private Vector3 _localGForce;
+    private Vector3 _lastVelocity;
+
+    private float _throttle;
+    public float Throttle
+    {
+        get { return _throttle; }
+        private set { _throttle = value; }
+    }
+    private float _throttleInput;
+
+    [Header("Steering")]
+    [SerializeField] private Vector3 _turnSpeed;
+    [SerializeField] private Vector3 _turnAcceleration;
+    [SerializeField] private AnimationCurve _steeringCurve;
+    [SerializeField] private Vector3 _currentControlInput;
+
+    [SerializeField] private float _gLimit;
+    [SerializeField] private float _gLimitPitch;
+
+    private Vector3 _effectiveInput;
+
+    
+    public Vector3 EffectiveInput
+    {
+        get { return _effectiveInput; }
+        private set { _effectiveInput = value; } 
+    }
+
+    public bool FlapsDeployed
+    {
+        get => _flapsDeployed;
+
+        private set
+        {
+            _flapsDeployed = value;
+
+            foreach (var lg in _landingGear)
+            {
+                lg.enabled = value;
+            }
+        }
+    }
+
+
     private void FixedUpdate()
     {
         var deltaTime = Time.fixedDeltaTime;
@@ -318,112 +420,5 @@ public class PlaneController : MonoBehaviour
         }
 
         return 1;
-    }
-
-    //��������
-
-    [SerializeField] private bool _airbrakeDeployed;//�������� �� ��������� ������
-    public bool AirbrakeDeployed
-    {
-        get { return _airbrakeDeployed; }
-        private set { _airbrakeDeployed = value; }
-    }
-
-    [Header("GameObjects")]
-    [SerializeField] private List<Collider> _landingGear;//������ ����������� ��� ������� �����
-    [SerializeField] private Rigidbody _rigidbody;
-    [SerializeField] private PhysicMaterial _landingGearBrakesMaterial;//�������� ������ ������� ��� ������� �����, ����� ����������� ��������� ������
-    [SerializeField] private PhysicMaterial _landingGearDefaultMaterial;//�������� ������ ������� ��� ������� �����, ����� �� ����������� ��������� ������
-
-    [Header("BaseParameters")]
-    [SerializeField] private float _maxThrust;//������������ ����
-
-    [SerializeField] private float _throttleSpeed;//�������� ��������� �������� ����
-
-    [Header("Lift")]
-    [SerializeField] private float _liftPower;
-    [SerializeField] private AnimationCurve _angleOfAttackLiftCurve;
-
-    [SerializeField] private float _inducedDrag;
-    [SerializeField] private AnimationCurve _inducedDragCurve;
-
-    [SerializeField] private float _rudderPower;
-    [SerializeField] private AnimationCurve _angleOfAttackRudderCurve;
-    [SerializeField] private AnimationCurve _rudderInducedDragCurve;
-
-    [SerializeField] private float _flapsLiftPower;
-    [SerializeField] private float _flapsAngleOfAttackBias;
-    [SerializeField] float _flapsDrag;
-    [SerializeField] private float _flapsRetractSpeed;
-
-    [Header("Drag")]
-    [SerializeField] AnimationCurve _dragForward;
-    [SerializeField] AnimationCurve _dragBack;
-    [SerializeField] AnimationCurve _dragLeft;
-    [SerializeField] AnimationCurve _dragRight;
-    [SerializeField] AnimationCurve _dragTop;
-    [SerializeField] AnimationCurve _dragBottom;
-
-    [SerializeField] float _airbrakeDrag;
-
-    [SerializeField] private bool _flapsDeployed;
-
-    [Header("Air Density And Temperature")]
-    private const float _seaLevelTemperature = 288.15f;
-    private const float _temperatureLapseRate = -0.0065f;
-
-    private Vector3 _currentVelocity;
-    private Vector3 _currentLocalVelocity;
-    private Vector3 _currentLocalAngularVelocity;
-
-    private float _angleOfAttack;
-    private float _angleOfAttackYaw;
-
-    private Vector3 _localGForce;
-    private Vector3 _lastVelocity;
-
-    private float _throttle;
-    public float Throttle
-    {
-        get { return _throttle; }
-        private set { _throttle = value; }
-    }
-    private float _throttleInput;
-
-    [Header("Steering")]
-    [SerializeField] private Vector3 _turnSpeed;
-    [SerializeField] private Vector3 _turnAcceleration;
-    [SerializeField] private AnimationCurve _steeringCurve;
-    [SerializeField] private Vector3 _currentControlInput;
-
-    [SerializeField] private float _gLimit;
-    [SerializeField] private float _gLimitPitch;
-
-    private Vector3 _effectiveInput;
-
-    // ��������� �������� ��� ������� � EffectiveInput
-    public Vector3 EffectiveInput
-    {
-        get { return _effectiveInput; }
-        private set { _effectiveInput = value; } // ������ ������ ��� ������ ������ ������
-    }
-
-    public bool FlapsDeployed//���������� ���������� � �����
-    {
-        get => _flapsDeployed;
-
-        private set
-        {
-            _flapsDeployed = value;
-
-            foreach (var lg in _landingGear)
-            {
-                lg.enabled = value;
-            }
-        }
-    }
-
-
-
-
+    }   
 }
