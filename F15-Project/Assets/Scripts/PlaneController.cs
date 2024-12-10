@@ -58,7 +58,7 @@ public static class Utilities
 
 public class PlaneController : MonoBehaviour
 {
-    [SerializeField] private bool _airbrakeDeployed;//�������� �� ��������� ������
+    [SerializeField] private bool _airbrakeDeployed;
     public bool AirbrakeDeployed
     {
         get { return _airbrakeDeployed; }
@@ -66,15 +66,15 @@ public class PlaneController : MonoBehaviour
     }
 
     [Header("GameObjects")]
-    [SerializeField] private List<Collider> _landingGear;//������ ����������� ��� ������� �����
+    [SerializeField] private List<Collider> _landingGear;
     [SerializeField] private Rigidbody _rigidbody;
-    [SerializeField] private PhysicMaterial _landingGearBrakesMaterial;//�������� ������ ������� ��� ������� �����, ����� ����������� ��������� ������
-    [SerializeField] private PhysicMaterial _landingGearDefaultMaterial;//�������� ������ ������� ��� ������� �����, ����� �� ����������� ��������� ������
+    [SerializeField] private PhysicMaterial _landingGearBrakesMaterial;
+    [SerializeField] private PhysicMaterial _landingGearDefaultMaterial;
 
     [Header("BaseParameters")]
-    [SerializeField] private float _maxThrust;//������������ ����
+    [SerializeField] private float _maxThrust;
 
-    [SerializeField] private float _throttleSpeed;//�������� ��������� �������� ����
+    [SerializeField] private float _throttleSpeed;
 
     [Header("Lift")]
     [SerializeField] private float _liftPower;
@@ -137,7 +137,41 @@ public class PlaneController : MonoBehaviour
 
     private Vector3 _effectiveInput;
 
-    
+    [SerializeField] private List<GameObject> _graphicsObjects;
+
+    private bool _isDestroyed = false;
+
+    [SerializeField] private float _baseMass = 14300;
+
+    [Header("Fuel")]
+    [SerializeField] private float _fuelCapacity = 6100f;
+    [SerializeField] private float _fuelConsumptionRate = 0.5f;
+    [SerializeField] private float _fuelDensity = 0.8f;
+
+    [SerializeField] private float _fuelAmount;
+
+    private bool _engineOff = false;
+
+    [Header("Turbulence")]
+    [SerializeField] private float _turbulenceStrength = 0.05f;
+    [SerializeField] private float _turbulenceFrequency = 1f;
+
+    [Header("Stall")]
+    [SerializeField] private float _stallAngle = 15f;
+    [SerializeField] private float _stallRecoveryForce = 10f;
+    [SerializeField] private float _stallTorqueMultiplier = 1f;
+
+    [SerializeField] private float _initialSpeed = 50f; // Начальная скорость, можете задать значение по умолчанию
+
+    private bool _isStalled = false;
+
+    [Header("Glide")]
+    [SerializeField] private float _glideRotationSpeed = 30f;
+    [SerializeField] private float _glideDamping = 0.5f;
+
+    [Header("Angular Drag")]
+    [SerializeField] private Vector3 _angularDrag = new Vector3(1f, 1f, 1f);
+
     public Vector3 EffectiveInput
     {
         get { return _effectiveInput; }
@@ -168,12 +202,27 @@ public class PlaneController : MonoBehaviour
         CalculateGForces(deltaTime);
         UpdateFlaps();
 
-        UpdateLift();
-        UpdateThrust();
         UpdateThrottle(deltaTime);
-        UpdateSteering(deltaTime);
+
+        UpdateFuel(deltaTime);
+
+        if (!_isDestroyed && !_engineOff)
+        {
+            ApplyTurbulence();
+
+            UpdateThrust();
+            UpdateLift();
+            UpdateSteering(deltaTime);
+
+            HandleStall();
+        }
+        if (_engineOff)
+        {
+            Glide();
+        }
 
         UpdateDrag();
+        UpdateAngularDrag();
     }
 
     private void CalculateState()
@@ -193,6 +242,10 @@ public class PlaneController : MonoBehaviour
         {
             _angleOfAttack = 0;
             _angleOfAttackYaw = 0;
+
+            _isStalled = Mathf.Abs(_angleOfAttack) > _stallAngle;
+
+            Debug.Log($"Velocity: {_currentLocalVelocity}, AoA: {_angleOfAttack}°, IsStalled: {_isStalled}");
 
             return;
         }
@@ -380,7 +433,6 @@ public class PlaneController : MonoBehaviour
 
         var effectiveInput = (correctionInput + _currentControlInput) * gForceScaling;
 
-        //��������� ������ ��������
         EffectiveInput = new Vector3(
             Mathf.Clamp(effectiveInput.x, -1, 1),
             Mathf.Clamp(effectiveInput.y, -1, 1),
@@ -420,5 +472,140 @@ public class PlaneController : MonoBehaviour
         }
 
         return 1;
-    }   
+    }
+
+    private void Die()
+    {
+        _throttle = 0;
+        _isDestroyed = true;
+
+        _rigidbody.isKinematic = true;
+
+        foreach (var go in _graphicsObjects)
+        {
+            go.SetActive(false);
+        }
+
+        Debug.Log("Самолет разрушен.");
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        for (var i = 0; i < collision.contactCount; i++)
+        {
+            var contact = collision.contacts[i];
+
+            if (_landingGear.Contains(contact.thisCollider))
+            {
+                return;
+            }
+
+            _rigidbody.isKinematic = true;
+            _rigidbody.position = contact.point;
+            _rigidbody.rotation = Quaternion.Euler(0, _rigidbody.rotation.eulerAngles.y, 0);
+
+            foreach (var go in _graphicsObjects)
+            {
+                go.SetActive(false);
+            }
+
+            Die();
+
+            return;
+        }
+    }
+
+    private void Start()
+    {
+        _rigidbody.velocity = _rigidbody.rotation * new Vector3(0, 0, _initialSpeed);
+
+        _fuelAmount = _fuelCapacity;
+        UpdateMass();
+
+        _lastVelocity = _rigidbody.velocity;
+    }
+
+
+    private void UpdateMass()
+    {
+        var fuelMass = _fuelAmount * _fuelDensity;
+        _rigidbody.mass = _baseMass + fuelMass;
+    }
+
+    private void UpdateFuel(float deltaTime)
+    {
+        if (_throttle > 0 && !_engineOff)
+        {
+            var fuelConsumed = _throttle * _fuelConsumptionRate * deltaTime;
+            _fuelAmount = Mathf.Max(0.1f, _fuelAmount - fuelConsumed);
+
+            UpdateMass();
+        }
+
+        if (_fuelAmount <= 0 && !_engineOff)
+        {
+            _engineOff = true;
+            _fuelAmount = 0;
+
+            Debug.Log("Топливо закончилось, двигатель выключен.");
+        }
+    }
+
+    private void ApplyTurbulence()
+    {
+        var turbulence = new Vector3(
+            Random.Range(-_turbulenceStrength, _turbulenceStrength),
+            Random.Range(-_turbulenceStrength, _turbulenceStrength),
+            Random.Range(-_turbulenceStrength, _turbulenceStrength)
+        );
+
+        _rigidbody.AddRelativeTorque(turbulence, ForceMode.Acceleration);
+    }
+
+    private void HandleStall()
+    {
+        if (!_isStalled)
+        {
+            return;
+        }
+
+        var stabilizationTorque = new Vector3(-_currentLocalAngularVelocity.x, -_currentLocalAngularVelocity.y, -_currentLocalAngularVelocity.z);
+        _rigidbody.AddRelativeTorque(stabilizationTorque * _stallRecoveryForce, ForceMode.Acceleration);
+    }
+
+    private void Glide()
+    {
+        if (!_engineOff)
+        {
+            return;
+        }
+
+        if (_rigidbody.velocity.sqrMagnitude < 0.1f)
+        {
+            return;
+        }
+
+        var forward = _rigidbody.velocity.normalized;
+        var up = Vector3.up;
+
+        var targetRotation = Quaternion.LookRotation(forward, up);
+
+        _rigidbody.rotation = Quaternion.RotateTowards(_rigidbody.rotation, targetRotation, _glideRotationSpeed * Time.deltaTime);
+        _rigidbody.angularVelocity = Vector3.Lerp(_rigidbody.angularVelocity, Vector3.zero, Time.deltaTime * _glideDamping);
+    }
+
+    private void UpdateAngularDrag()
+    {
+        var av = _currentLocalAngularVelocity;
+
+        if (av.sqrMagnitude == 0)
+        {
+            return;
+        }
+
+        var drag = Vector3.Scale(av.sqrMagnitude * -av.normalized, _angularDrag);
+
+        _rigidbody.AddRelativeTorque(drag, ForceMode.Acceleration);
+    }
+
 }
