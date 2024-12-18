@@ -3,7 +3,10 @@ guid: 37608846b76cc8549867b5d7e9b5f380
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - _rigidbody: {instanceID: 0}
+  - _landingGearBrakesMaterial: {instanceID: 0}
+  - _landingGearDefaultMaterial: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

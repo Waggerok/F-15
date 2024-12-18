@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class Utilities
+public static class Utilities //нужен для плавным изменением значений, он позволит задать скорость изменения
 {
-    public static float MoveTo(float value, float target, float speed, float deltaTime, float min = 0, float max = 1)
+    public static float MoveTo(float value, float target, float speed, float deltaTime, float min = 0, float max = 1) //
     {
         var diff = target - value;
 
@@ -58,7 +58,7 @@ public static class Utilities
 
 public class PlaneController : MonoBehaviour
 {
-    [SerializeField] private bool _airbrakeDeployed;
+    [SerializeField] private bool _airbrakeDeployed; //помогает замедлить самолёт, создавая доп. сопротивление
     public bool AirbrakeDeployed
     {
         get { return _airbrakeDeployed; }
@@ -66,33 +66,33 @@ public class PlaneController : MonoBehaviour
     }
 
     [Header("GameObjects")]
-    [SerializeField] private List<Collider> _landingGear;
+    [SerializeField] private List<Collider> _landingGear; //список коллайдеров для каждого колеса
     [SerializeField] private Rigidbody _rigidbody;
-    [SerializeField] private PhysicMaterial _landingGearBrakesMaterial;
-    [SerializeField] private PhysicMaterial _landingGearDefaultMaterial;
+    [SerializeField] private PhysicMaterial _landingGearBrakesMaterial; //материал физики для тормозного состояния шасси
+    [SerializeField] private PhysicMaterial _landingGearDefaultMaterial; //материал физики для стандартного состояния шасси
 
     [Header("BaseParameters")]
-    [SerializeField] private float _maxThrust;
+    [SerializeField] private float _maxThrust; // Хранит максимальную силу тяги
 
-    [SerializeField] private float _throttleSpeed;
+    [SerializeField] private float _throttleSpeed; //хранит скорость изменения значения дросселя
 
     [Header("Lift")]
-    [SerializeField] private float _liftPower;
-    [SerializeField] private AnimationCurve _angleOfAttackLiftCurve;
+    [SerializeField] private float _liftPower; //основная сила подъёма
+    [SerializeField] private AnimationCurve _angleOfAttackLiftCurve; //анимационная кривая, описывающая зависимость подъемной силы от угла атаки
 
-    [SerializeField] private float _inducedDrag;
-    [SerializeField] private AnimationCurve _inducedDragCurve;
+    [SerializeField] private float _inducedDrag; // задает коэффицент идуцированного сопротивления
+    [SerializeField] private AnimationCurve _inducedDragCurve; //кривая, описывающая зависимость индуцированного сопротивления от подъемной силы
 
-    [SerializeField] private float _rudderPower;
-    [SerializeField] private AnimationCurve _angleOfAttackRudderCurve;
-    [SerializeField] private AnimationCurve _rudderInducedDragCurve;
+    [SerializeField] private float _rudderPower; //задает мощность управляющего руля
+    [SerializeField] private AnimationCurve _angleOfAttackRudderCurve; //кривая, описывающая , как подъемная сила
+    [SerializeField] private AnimationCurve _rudderInducedDragCurve;//кривая, описывающая индуцированное сопротивление
 
-    [SerializeField] private float _flapsLiftPower;
-    [SerializeField] private float _flapsAngleOfAttackBias;
-    [SerializeField] float _flapsDrag;
-    [SerializeField] private float _flapsRetractSpeed;
+    [SerializeField] private float _flapsLiftPower; //задает доп. подъемную силу, при развернутых закрылках
+    [SerializeField] private float _flapsAngleOfAttackBias; //хранит изменение угла атаки при развернутых закрылках
+    [SerializeField] float _flapsDrag; //хранит дополнительное сопротивление, создаваемое закрылками
+    [SerializeField] private float _flapsRetractSpeed; //хранит скорость, при достижении которой закрылки автоматически убираются
 
-    [Header("Drag")]
+    [Header("Drag")] //Изменение сопротивление при движении
     [SerializeField] AnimationCurve _dragForward;
     [SerializeField] AnimationCurve _dragBack;
     [SerializeField] AnimationCurve _dragLeft;
@@ -100,40 +100,41 @@ public class PlaneController : MonoBehaviour
     [SerializeField] AnimationCurve _dragTop;
     [SerializeField] AnimationCurve _dragBottom;
 
-    [SerializeField] float _airbrakeDrag;
+    [SerializeField] float _airbrakeDrag; //задает величину дополнительного сопротивления
 
-    [SerializeField] private bool _flapsDeployed;
+    [SerializeField] private bool _flapsDeployed; //true|false переменная, развернуты ли закрылки на истребителе
 
     [Header("Air Density And Temperature")]
-    private const float _seaLevelTemperature = 288.15f;
-    private const float _temperatureLapseRate = -0.0065f;
+    private const float _seaLevelTemperature = 288.15f; //температура на уровне моря в Кельвинах
+    private const float _temperatureLapseRate = -0.0065f; //коэффицент изменения температуры в зависимости от высоты
 
-    private Vector3 _currentVelocity;
-    private Vector3 _currentLocalVelocity;
-    private Vector3 _currentLocalAngularVelocity;
+    private Vector3 _currentVelocity; //  хранит текущую мировую скорость самолета
+    private Vector3 _currentLocalVelocity; // Поле которое хранит текущую локальную скорость самолета
+    private Vector3 _currentLocalAngularVelocity; // Это поле хранит текущую локальную угловую скорость самолета
 
-    private float _angleOfAttack;
-    private float _angleOfAttackYaw;
+    
+    private float _angleOfAttack; // хранит значение угла атаки вдоль продольной оси
+    private float _angleOfAttackYaw; // хранит значение угла атаки вдоль горизонтальной оси
 
-    private Vector3 _localGForce;
-    private Vector3 _lastVelocity;
+    private Vector3 _localGForce; //хранит текущие перегузки самолета
+    private Vector3 _lastVelocity; //хранит значение скорости самолета на предыдущем кадре
 
-    private float _throttle;
+    private float _throttle; // хранит сколько тяги в данный момент прикладывается к самолёту
     public float Throttle
     {
         get { return _throttle; }
         private set { _throttle = value; }
     }
-    private float _throttleInput;
+    private float _throttleInput; // Это поле задает текущий пользовательский ввод для дросселя.
 
     [Header("Steering")]
-    [SerializeField] private Vector3 _turnSpeed;
-    [SerializeField] private Vector3 _turnAcceleration;
-    [SerializeField] private AnimationCurve _steeringCurve;
-    [SerializeField] private Vector3 _currentControlInput;
+    [SerializeField] private Vector3 _turnSpeed; //определяет максимальные скорости поворота 
+    [SerializeField] private Vector3 _turnAcceleration; // определяет максимальные ускорения
+    [SerializeField] private AnimationCurve _steeringCurve; //анимационная кривая, задает силу поворота в зависимости от текущей скорости самолета
+    [SerializeField] private Vector3 _currentControlInput; //хранит текущее управление от игрока
 
-    [SerializeField] private float _gLimit;
-    [SerializeField] private float _gLimitPitch;
+    [SerializeField] private float _gLimit; //задает максимальную допустимую перегрузку по осям X и Z
+    [SerializeField] private float _gLimitPitch; //задает максимальную допустимую перегрузку по оси Y
 
     private Vector3 _effectiveInput;
 
@@ -178,7 +179,7 @@ public class PlaneController : MonoBehaviour
         private set { _effectiveInput = value; } 
     }
 
-    public bool FlapsDeployed
+    public bool FlapsDeployed //свойство, которое позволяет управлять состоянием закрылок и шасси
     {
         get => _flapsDeployed;
 
@@ -194,9 +195,9 @@ public class PlaneController : MonoBehaviour
     }
 
 
-    private void FixedUpdate()
+    private void FixedUpdate() // Для просчета физических сил
     {
-        var deltaTime = Time.fixedDeltaTime;
+        var deltaTime = Time.fixedDeltaTime; // сохранение фиксированного интервала времени в переменную
 
         CalculateState();
         CalculateGForces(deltaTime);
@@ -218,14 +219,14 @@ public class PlaneController : MonoBehaviour
         }
         if (_engineOff)
         {
-            Glide();
+            Glide(); //переход в режим планирования
         }
 
         UpdateDrag();
         UpdateAngularDrag();
     }
 
-    private void CalculateState()
+    private void CalculateState() // Рассчитывание состояние самолёта
     {
         var invRotation = Quaternion.Inverse(_rigidbody.rotation);
 
@@ -236,16 +237,16 @@ public class PlaneController : MonoBehaviour
         CalculateAngleOfAttack();
     }
 
-    private void CalculateAngleOfAttack()
+    private void CalculateAngleOfAttack() // Рассчитывание угла атаки истребителя
     {
         if (_currentLocalVelocity.sqrMagnitude <= 0.1f)
         {
             _angleOfAttack = 0;
             _angleOfAttackYaw = 0;
 
-            _isStalled = Mathf.Abs(_angleOfAttack) > _stallAngle;
+            _isStalled = Mathf.Abs(_angleOfAttack) > _stallAngle; //добавляем строчки для расчета состояния сваливания
 
-            Debug.Log($"Velocity: {_currentLocalVelocity}, AoA: {_angleOfAttack}°, IsStalled: {_isStalled}");
+            Debug.Log($"Velocity: {_currentLocalVelocity}, AoA: {_angleOfAttack}°, IsStalled: {_isStalled}"); 
 
             return;
         }
@@ -256,7 +257,7 @@ public class PlaneController : MonoBehaviour
         Debug.Log($"Velocity: {_currentLocalVelocity}, AoA: {_angleOfAttack * Mathf.Rad2Deg}");
     }
 
-    private void CalculateGForces(float deltaTime)
+    private void CalculateGForces(float deltaTime) // Рассчитывание перегрузки истребителя
     {
         var invRotation = Quaternion.Inverse(_rigidbody.rotation);
         var acceleration = (_currentVelocity - _lastVelocity) / deltaTime;
@@ -266,18 +267,18 @@ public class PlaneController : MonoBehaviour
         _lastVelocity = _currentVelocity;
     }
 
-    private void UpdateThrust()
+    private void UpdateThrust() //Метод который применяет тягу к самолёту
     {
         var thrust = _throttle * _maxThrust;
         _rigidbody.AddRelativeForce(thrust * Vector3.forward);
     }
 
-    public void SetThrottleInput(float input)
+    public void SetThrottleInput(float input) // этот метод меняет _throttleInput в зависимости от ввода пользователя
     {
         _throttleInput = input;
     }
 
-    private void UpdateThrottle(float dt)
+    private void UpdateThrottle(float dt) // Обновляет значение дросселя
     {
         float target = 0;
 
@@ -306,7 +307,7 @@ public class PlaneController : MonoBehaviour
         }
     }
 
-    private void UpdateDrag()
+    private void UpdateDrag() //рассчитывает силу сопротивления воздуха и применение её к самолёту
     {
         var globalVelocity = _rigidbody.velocity;
         var globalVelocitySqr = globalVelocity.sqrMagnitude;
@@ -329,7 +330,7 @@ public class PlaneController : MonoBehaviour
         _rigidbody.AddForce(drag, ForceMode.Force);
     }
 
-    public void ToggleFlaps()
+    public void ToggleFlaps() //переключает состояние закрылок в зависимости от скорости самолета
     {
         if (_currentLocalVelocity.z < _flapsRetractSpeed)
         {
@@ -337,7 +338,7 @@ public class PlaneController : MonoBehaviour
         }
     }
 
-    private void UpdateFlaps()
+    private void UpdateFlaps() //автоматически убирает закрылки при достижении скорости в 125 единиц
     {
         if (_currentLocalVelocity.z > _flapsRetractSpeed)
         {
@@ -345,8 +346,8 @@ public class PlaneController : MonoBehaviour
         }
     }
 
-    private Vector3 CalculateLift(float angleOfAttack, Vector3 rightAxis, float liftPower,
-        AnimationCurve animationCurve, AnimationCurve inducedDragCurve)
+    private Vector3 CalculateLift(float angleOfAttack, Vector3 rightAxis, float liftPower, //рассчитывает силу подъёма и индуцированное сопротивление на основе текущего угла атаки, 
+        AnimationCurve animationCurve, AnimationCurve inducedDragCurve) // скорости и плотности воздухаф
     {
         var liftVelocityOnWings = Vector3.ProjectOnPlane(_currentLocalVelocity, rightAxis);
         var liftVelocityOnWingsSqr = liftVelocityOnWings.sqrMagnitude;
@@ -363,7 +364,7 @@ public class PlaneController : MonoBehaviour
         return lift + inducedDrag;
     }
 
-    private float CalculateAirDensity(float altitude)
+    private float CalculateAirDensity(float altitude) //расчет плотности воздуха в зависимости от высоты
     {
         var temperature = _seaLevelTemperature + _temperatureLapseRate * altitude;
         var pressure = 101325 * Mathf.Pow(1 + (_temperatureLapseRate * altitude) / _seaLevelTemperature, -9.80665f / (_temperatureLapseRate * 287.05f));
@@ -372,7 +373,7 @@ public class PlaneController : MonoBehaviour
         return Mathf.Max(density, 0.1f);
     }
 
-    private void UpdateLift()
+    private void UpdateLift() //просчитывает силу подъема
     {
         if (_currentLocalVelocity.sqrMagnitude < 1f)
         {
@@ -399,7 +400,7 @@ public class PlaneController : MonoBehaviour
         _rigidbody.AddRelativeForce(yawForce);
     }
 
-    private float CalculateSteering(float dt, float angularVelocity, float targetVelocity, float acceleration)
+    private float CalculateSteering(float dt, float angularVelocity, float targetVelocity, float acceleration)//отвечает за корректировку угловой скорости самолета с учетом текущего состояния
     {
         var difference = targetVelocity - angularVelocity;
         var accel = acceleration * dt;
@@ -407,7 +408,7 @@ public class PlaneController : MonoBehaviour
         return Mathf.Clamp(difference, -accel, accel);
     }
 
-    private void UpdateSteering(float dt)
+    private void UpdateSteering(float dt) //рассчитывает и применяет силу поворота к самолету
     {
         var speed = Mathf.Max(0, _currentLocalVelocity.z);
         var steeringPower = _steeringCurve.Evaluate(speed);
@@ -440,12 +441,12 @@ public class PlaneController : MonoBehaviour
         );
     }
 
-    public void SetControlInput(Vector3 input)
+    public void SetControlInput(Vector3 input) //передает управление в истребитель
     {
         _currentControlInput = Vector3.ClampMagnitude(input, 1);
     }
 
-    private Vector3 CalculateGForceLimit(Vector3 input)
+    private Vector3 CalculateGForceLimit(Vector3 input) //рассчитывает перегрузки на основе пользовательского ввода и ограничений
     {
         return Utilities.Scale6(input,
             _gLimit, _gLimitPitch,
@@ -453,12 +454,12 @@ public class PlaneController : MonoBehaviour
             _gLimit, _gLimit) * 9.81f;
     }
 
-    private Vector3 CalculateGForce(Vector3 angularVelocity, Vector3 velocity)
+    private Vector3 CalculateGForce(Vector3 angularVelocity, Vector3 velocity) //просчитывает calculateGForce при действии угловой скорости
     {
         return Vector3.Cross(angularVelocity, velocity);
     }
 
-    private float CalculateGLimiter(Vector3 controlInput, Vector3 maxAngularVelocity)
+    private float CalculateGLimiter(Vector3 controlInput, Vector3 maxAngularVelocity) //вычисляет коэффицент масштабирования для управления с учетом G-Limit
     {
         var maxInput = controlInput.normalized;
 
@@ -474,7 +475,7 @@ public class PlaneController : MonoBehaviour
         return 1;
     }
 
-    private void Die()
+    private void Die() //отключает физику самолета и визуальные компоненты
     {
         _throttle = 0;
         _isDestroyed = true;
@@ -489,7 +490,7 @@ public class PlaneController : MonoBehaviour
         Debug.Log("Самолет разрушен.");
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter(Collision collision) // при столкновении уничтожает истребитель
     {
         for (var i = 0; i < collision.contactCount; i++)
         {
@@ -515,7 +516,7 @@ public class PlaneController : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void Start() //первоночальная инициализации полей массы и топлива
     {
         _rigidbody.velocity = _rigidbody.rotation * new Vector3(0, 0, _initialSpeed);
 
@@ -526,13 +527,13 @@ public class PlaneController : MonoBehaviour
     }
 
 
-    private void UpdateMass()
+    private void UpdateMass() //обновляет массу в зависимости от количества топлива
     {
         var fuelMass = _fuelAmount * _fuelDensity;
         _rigidbody.mass = _baseMass + fuelMass;
     }
 
-    private void UpdateFuel(float deltaTime)
+    private void UpdateFuel(float deltaTime) //отвечает за расход товлива в зависимости от положения дросселя
     {
         if (_throttle > 0 && !_engineOff)
         {
@@ -551,7 +552,7 @@ public class PlaneController : MonoBehaviour
         }
     }
 
-    private void ApplyTurbulence()
+    private void ApplyTurbulence() //добавляет случайные вращательные моменты к самолету, имитируя турбулентные возмущения
     {
         var turbulence = new Vector3(
             Random.Range(-_turbulenceStrength, _turbulenceStrength),
@@ -562,7 +563,7 @@ public class PlaneController : MonoBehaviour
         _rigidbody.AddRelativeTorque(turbulence, ForceMode.Acceleration);
     }
 
-    private void HandleStall()
+    private void HandleStall() //отвечает за попытки стабилизации при сваливании
     {
         if (!_isStalled)
         {
@@ -573,7 +574,7 @@ public class PlaneController : MonoBehaviour
         _rigidbody.AddRelativeTorque(stabilizationTorque * _stallRecoveryForce, ForceMode.Acceleration);
     }
 
-    private void Glide()
+    private void Glide() //при выключенном двигателе стабилизирует ориентаию и медленно снижается
     {
         if (!_engineOff)
         {
@@ -594,7 +595,7 @@ public class PlaneController : MonoBehaviour
         _rigidbody.angularVelocity = Vector3.Lerp(_rigidbody.angularVelocity, Vector3.zero, Time.deltaTime * _glideDamping);
     }
 
-    private void UpdateAngularDrag()
+    private void UpdateAngularDrag() //просчет углового сопротивления
     {
         var av = _currentLocalAngularVelocity;
 

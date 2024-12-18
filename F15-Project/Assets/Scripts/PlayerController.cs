@@ -46,7 +46,7 @@ public class PlayerController : MonoBehaviour, PlayerInputAsset.IPlayerInputActi
         _planeController.SetThrottleInput(context.ReadValue<float>());
     }
 
-    public void OnFlaps(InputAction.CallbackContext context)
+    public void OnFlaps(InputAction.CallbackContext context) //нужен для получения значений после нажатия кнопки F
     {
         if (_planeController == null)
         {

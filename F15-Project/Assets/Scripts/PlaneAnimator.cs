@@ -36,7 +36,7 @@ public class PlaneAnimator : MonoBehaviour
 
     private Vector3 _deflection;
 
-    private readonly Dictionary<Transform, Quaternion> _neutralPoses = new();
+    private readonly Dictionary<Transform, Quaternion> _neutralPoses = new(); //хранение нейтральных позиций управляющих поверхностей
 
     [Header("AirBrake")]
     [SerializeField] private Transform _airbrake;  
@@ -47,7 +47,7 @@ public class PlaneAnimator : MonoBehaviour
     private float _flapsPosition;
 
 
-    private void LateUpdate()
+    private void LateUpdate() //обновляет визуальные элементы самолета на каждом кадре
     {
         var dt = Time.deltaTime;
 
@@ -57,7 +57,7 @@ public class PlaneAnimator : MonoBehaviour
         UpdateFlaps(dt);
     }
 
-    private void Start()
+    private void Start() //сохраняет исходные позиции управляющих поверхностей в словарь
     {
         AddNeutralPose(_leftAileron);
         AddNeutralPose(_rightAileron);
@@ -79,7 +79,7 @@ public class PlaneAnimator : MonoBehaviour
             AddNeutralPose(t);
         }
     }
-    private void UpdateAfterburners()
+    private void UpdateAfterburners() //управляет включением и выключением графики форсажа, а также изменением их размера в зависимости от уровня тяги
     {
         var throttle = _planeController.Throttle;
 
