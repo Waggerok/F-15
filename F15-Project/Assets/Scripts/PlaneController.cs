@@ -484,7 +484,7 @@ public class PlaneController : MonoBehaviour
 
         foreach (var go in _graphicsObjects)
         {
-            go.SetActive(false);
+            go.SetActive(true);
         }
 
         Debug.Log("Самолет разрушен.");
